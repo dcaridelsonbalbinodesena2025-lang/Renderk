@@ -1,8 +1,3 @@
-import os
-from flask import Flask
-from flask_socketio import SocketIO
-from pocketoptionapi.stable_api import PocketOption
-import eventlet
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
