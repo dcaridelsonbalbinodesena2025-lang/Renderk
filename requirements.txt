@@ -2,4 +2,4 @@ flask
 flask-socketio
 eventlet
 gunicorn
-git+https://github.com/nandofps/pocketoptionapi.git
+https://github.com/nandofps/pocketoptionapi/archive/refs/heads/main.zip
