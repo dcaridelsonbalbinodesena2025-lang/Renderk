@@ -1,5 +1,0 @@
-flask
-flask-socketio
-eventlet
-gunicorn
-git+https://github.com/nilo-p/pocketoption-api.git
