@@ -1,29 +1,34 @@
 import os
-import eventlet
-from flask import Flask
-from flask_socketio import SocketIO
-from pocketoptionapi.stable_api import PocketOption
+from flask import Flask, request, jsonify
+from pocketoptionapi.stable_api import PocketOptionAPI
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
 
-# COLE SEU SSID ENTRE AS ASPAS ABAIXO
-SSID = "COLE_SEU_SSID_AQUI"
+# --- CONFIGURAÇÃO DA PONTE ---
+# Usei o código que começa com A_ da sua foto
+SSID = "A_OEQ0BLQUmg239qW" 
+api = PocketOptionAPI(SSID)
 
-api = PocketOption(SSID)
-api.connect()
+@app.route('/')
+def home():
+    return "Ponte Online!"
 
-def enviar_precos():
-    while True:
-        try:
-            precos = api.get_all_realtime_candles()
-            for ativo, dados in precos.items():
-                socketio.emit('v19_update', {'ativo': ativo, 'valor': dados['close']})
-        except:
-            pass
-        eventlet.sleep(0.5)
+@app.route('/executar', methods=['POST'])
+def executar_ordem():
+    dados = request.json
+    ativo = dados.get('ativo', 'EURUSD_otc')
+    valor = dados.get('valor', 1)
+    direcao = dados.get('direcao') # 'call' ou 'put'
+    tempo = dados.get('tempo', 60)
+
+    check, reason = api.connect()
+    if check:
+        # Comando que envia a ordem para a Pocket Option
+        id_ordem = api.buy_order(ativo, valor, direcao, tempo)
+        return jsonify({"status": "sucesso", "id": id_ordem})
+    else:
+        return jsonify({"status": "erro", "motivo": reason}), 400
 
 if __name__ == '__main__':
-    eventlet.spawn(enviar_precos)
-    port = int(os.environ.get("PORT", 10000))
-    socketio.run(app, host='0.0.0.0', port=port)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
